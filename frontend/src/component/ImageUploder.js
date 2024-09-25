@@ -19,25 +19,32 @@ const ImageUploder = () => {
     console.log("File submitted:", formData);
   };
 
-  const handlePost = (e) => {
-    // e.preventDefault()
-    // const response = fetch("http://localhost:8000/addfile",{
-    //     method:"POST",
-    //     body:JSON.stringify{
-    //     }
-    // })
+  const handlePost = async (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append("files", file);
+    try {
+      const response = await fetch("http://localhost:8000/addfile", {
+        method: "POST",
+        body: formdata,
+      });
+      console.log("sucess");
+    } catch (e) {
+      console.log("error  uploading file", e);
+    }
   };
 
   return (
     <HStack>
-      <form onChange={handlePost}></form>
-      <FormControl>
-        <FormLabel>upload file</FormLabel>
-        <Input type="file" onChange={handleChange}></Input>
-        <Button colorScheme="blue" mt={6} type="submit">
-          Submit
-        </Button>
-      </FormControl>
+      <form onSubmit={handlePost}>
+        <FormControl>
+          <FormLabel>upload file</FormLabel>
+          <Input type="file" onChange={handleChange}></Input>
+          <Button colorScheme="blue" mt={6} type="submit">
+            Submit
+          </Button>
+        </FormControl>
+      </form>
     </HStack>
   );
 };
