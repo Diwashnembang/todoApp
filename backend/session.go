@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"errors"
-	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 type sessionManger struct {
@@ -15,23 +15,32 @@ type sessionManger struct {
 	password string
 }
 
-type Sessions struct {
-	Username string `json:"username"`
-	Id       []byte `json:"id"`
-}
+// type Sessions struct {
+// 	Username string `json:"username"`
+// 	Id       []byte `json:"id"`
+// }
 
-func addSession(w http.ResponseWriter, file io.Writer, session sessionManger) error{
-	encoder := json.NewEncoder(file)
-	sessions := &Sessions{}
+func addSession(w http.ResponseWriter, file *os.File, session sessionManger) error {
+	defer file.Close()
+	sessionInfo := make(map[string]string)
 	cookie := http.Cookie{Name: session.username, Value: string(session.id)}
+	sessionInfo[string(session.id)] = session.username
 	http.SetCookie(w, &cookie)
-	sessions.Username = session.username
-	sessions.Id = session.id
+	jsonSessionInfo, err := json.Marshal(sessionInfo)
+	if err != nil {
+		log.Println("error marahslling sessionInfo")
+		return errors.New("error in addsession")
+	}
 
-	if err := encoder.Encode(sessions);err != nil{
-		log.Println("couldn't add session")
-		return errors.New("couldn't adss sessions to the file")
-
+	offset, err := file.Seek(-1, 2)
+	if err != nil {
+		log.Println("errror seeking")
+		return errors.New("error in addsession")
+	}
+	_, err = file.WriteAt([]byte(jsonSessionInfo), offset)
+	if err != nil {
+		log.Println("error writing")
+		return errors.New("error in addsession")
 	}
 	return nil
 }

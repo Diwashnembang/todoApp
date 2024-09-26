@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 var todolists []tasks
@@ -29,6 +30,7 @@ func main() {
 	corsHandlerUpload := corsMiddleware(http.HandlerFunc(handleUpload))
 	mux.HandleFunc("/", corsHandler)
 	mux.HandleFunc("/addfile", corsHandlerUpload)
+	mux.HandleFunc("/login", corsMiddleware(handleLogin))
 	err := http.ListenAndServe(":8000", mux)
 	if err != nil {
 		log.Fatal("cannot listen on port 8000")
@@ -87,6 +89,28 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		//start by creating file
+		body := make(map[string]string)
+		err := r.ParseForm()
+		// if err != nil {
+		// 	log.Println("error reading body data ")
+		// }
+
+		// err = json.Unmarshal(bodyData, &body)
+		// if err != nil {
+		// 	log.Println("error unmarshalling data")
+		// 	log.Println("error unmarshalling data", err)
+		// }
+		body["username"] = r.FormValue("username")
+		file, err := os.OpenFile("sessionsinfo", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+		if err != nil {
+			log.Println("error with file handling")
+		}
+		session := newSession(body["username"], body["password"])
+		err = addSession(w, file, session)
+		if err != nil {
+			log.Println("error adding session")
+			w.WriteHeader(500)
+		}
 	}
 }
 func handlePost(w http.ResponseWriter, r *http.Request) {

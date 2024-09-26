@@ -10,12 +10,14 @@ import React, { useState } from "react";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     let formData = new FormData();
     formData.append("username", username);
     formData.append("passoword", password);
+    console.log(formData.get("username"));
     try {
-      const respons = await fetch("http://localhost:8000/", {
+      const respons = await fetch("http://localhost:8000/login", {
         method: "POST",
         body: formData,
       });
