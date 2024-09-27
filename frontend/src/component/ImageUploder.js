@@ -12,11 +12,11 @@ const ImageUploder = () => {
   const [file, setFile] = useState("");
   const handleChange = (e) => {
     setFile(e.target.files[0]);
-    const formData = new FormData();
-    formData.append("file", file);
+    // const formData = new FormData();
+    // formData.append("file", file);
 
-    // You would send the formData to your server here using fetch or axios
-    console.log("File submitted:", formData);
+    // // You would send the formData to your server here using fetch or axios
+    // console.log("File submitted:", formData);
   };
 
   const handlePost = async (e) => {

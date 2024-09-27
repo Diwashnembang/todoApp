@@ -11,10 +11,6 @@ import (
 
 var todolists []tasks
 
-type doc []byte
-
-var files []doc
-
 type tasks struct {
 	id   int
 	task string
@@ -39,9 +35,10 @@ func main() {
 
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -90,18 +87,13 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		//start by creating file
 		body := make(map[string]string)
-		err := r.ParseForm()
-		// if err != nil {
-		// 	log.Println("error reading body data ")
-		// }
-
-		// err = json.Unmarshal(bodyData, &body)
-		// if err != nil {
-		// 	log.Println("error unmarshalling data")
-		// 	log.Println("error unmarshalling data", err)
-		// }
+		err := r.ParseMultipartForm(1 << 10)
+		if err != nil {
+			log.Println("error reading body data ")
+		}
 		body["username"] = r.FormValue("username")
-		file, err := os.OpenFile("sessionsinfo", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+		body["password"] = r.FormValue("password")
+		file, err := os.OpenFile("sessionsinfo", os.O_CREATE|os.O_RDWR, 0644)
 		if err != nil {
 			log.Println("error with file handling")
 		}
@@ -111,6 +103,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 			log.Println("error adding session")
 			w.WriteHeader(500)
 		}
+		w.Write([]byte("logind sucessfull"))
 	}
 }
 func handlePost(w http.ResponseWriter, r *http.Request) {

@@ -20,7 +20,9 @@ const Login = () => {
       const respons = await fetch("http://localhost:8000/login", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
+      console.log(document.cookie);
     } catch (e) {
       console.log("error in posting login details", e);
     }
